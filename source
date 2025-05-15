@@ -1,0 +1,131 @@
+from google.colab import files
+import pandas as pd
+
+df = pd.read_csv('/content/sentimentdataset.csv')
+df.head()
+from google.colab import drive
+drive.mount('/content/sentimentdataset.csv')
+df.info()
+df.describe()
+print("Missing values:\n", df.isnull().sum())
+print("\nDuplicate rows:", df.duplicated().sum())
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.countplot(x='Retweets', data=df)
+plt.title('Target Variable Distribution')
+plt.show()
+X = df.drop("Timestamp", axis=1)  # Replace 'target_column' with actual column name
+y = df["Timestamp"]
+categorical_cols = X.select_dtypes(include='object').columns
+X[categorical_cols] = X[categorical_cols].apply(lambda col: col.astype('category').cat.codes)
+X = pd.get_dummies(X, drop_first=True)
+from sklearn.preprocessing import StandardScaler
+
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestClassifier
+import pandas as pd
+
+# Assuming 'df' is your DataFrame containing the data
+# ... (Your code to load and preprocess the data, up to the point before train_test_split) ...
+
+# Separate features (X) and target (y)
+X = df.drop("Timestamp", axis=1)
+y = df["Timestamp"]
+
+# Convert categorical columns to numerical using one-hot encoding
+categorical_cols = X.select_dtypes(include=['object', 'category']).columns
+X = pd.get_dummies(X, columns=categorical_cols, drop_first=True)
+
+
+# Scale numerical features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Split data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+# Create and fit the model
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+
+# Define the model before using it
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("Classification Report:\n", classification_report(y_test, y_pred))
+import pandas as pd
+from sklearn.preprocessing import StandardScaler
+
+# ... (Your existing code to load and preprocess the data) ...
+
+# Assume 'X' is your DataFrame with 2489 features before scaling
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)  # Fit and transform the original data
+
+# ... (Your model training and other code) ...
+
+# Now, for new input:
+new_input = {'feature1': 1, 'feature2': 2, 'feature3': 3,  'feature4':0,'feature5':0,'feature6':0,'feature7':0,'feature8':0,'feature9':0,'feature10':0,'feature11':0,'feature12':0,'feature13':0,'feature14':0}  # Example input dictionary
+
+# Create a DataFrame from the new input
+new_input_df = pd.DataFrame([new_input])
+
+# Get missing columns and add them with value 0
+missing_cols = set(X.columns) - set(new_input_df.columns)
+for col in missing_cols:
+    new_input_df[col] = 0
+
+# Ensure the order of columns matches the original data
+new_input_df = new_input_df[X.columns]
+
+# Now you can scale the new input
+scaled_input = scaler.transform(new_input_df)
+
+# ... (Rest of your prediction code) ...
+def preprocess_input(input_dict):
+    input_df = pd.DataFrame([input_dict])
+def preprocess_input(input_dict):
+    input_df = pd.DataFrame([input_dict])
+    for col in categorical_cols:
+        input_df[col] = input_df[col].astype('category').cat.codes
+    input_df = pd.get_dummies(input_df)
+    input_df = input_df.reindex(columns=X.columns, fill_value=0)
+    input_scaled = scaler.transform(input_df)
+    return input_scaled
+    return input_scaled
+def predict_final_grade(input_dict):
+    processed = preprocess_input(input_dict)
+    return model.predict(processed)[0]
+!pip install gradio as gr
+def predict_interface(value1, value2, *args):  # Use *args to accept a variable number of arguments
+    """Predicts the final grade/label.
+
+    Args:
+        value1: The value for feature1.
+        value2: The value for feature2.
+        *args: Any additional values for other features.
+
+    Returns:
+        A string containing the predicted grade/label.
+    """
+    input_data = {
+        "feature1": value1,
+        "feature2": value2,
+    }
+    # Handle additional arguments from *args
+    for i, arg in enumerate(args):
+        input_data[f"feature{i + 3}"] = arg  # Assign to subsequent features
+
+    result = predict_final_grade(input_data)
+    return f"Predicted Grade/Label: {result}"
